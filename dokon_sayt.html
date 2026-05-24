@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#6C63FF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="DokonIM">
+<title>DokonIM</title>
+<link rel="manifest" href="manifest.json">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F4F5F7;min-height:100vh;color:#1A1A2E}
+:root{--primary:#6C63FF;--primary-dark:#5A52D5;--accent:#FF6584;--bg:#F4F5F7;--card:#fff;--text:#1A1A2E;--muted:#8892A4;--border:#E8EBF0;--success:#27AE60;--danger:#E74C3C}
+
+/* HEADER */
+.header{background:var(--primary);color:#fff;padding:0 16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(108,99,255,0.3)}
+.header-inner{display:flex;align-items:center;height:56px;gap:12px;max-width:600px;margin:0 auto}
+.store-name{font-size:18px;font-weight:700;flex:1}
+.header-btn{background:rgba(255,255,255,0.2);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px}
+
+/* SEARCH */
+.search-bar{background:#fff;margin:12px 16px;border-radius:12px;display:flex;align-items:center;padding:0 12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);max-width:568px;margin-left:auto;margin-right:auto;display:flex}
+.search-bar input{border:none;outline:none;flex:1;height:44px;font-size:14px;background:transparent;color:var(--text)}
+.search-bar span{color:var(--muted);font-size:18px}
+
+/* CATEGORIES */
+.cats{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;max-width:600px;margin:0 auto}
+.cats::-webkit-scrollbar{display:none}
+.cat-btn{flex-shrink:0;padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);background:#fff;font-size:13px;cursor:pointer;color:var(--muted);font-weight:500;white-space:nowrap}
+.cat-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* PRODUCT GRID */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 16px 80px;max-width:600px;margin:0 auto}
+@media(min-width:500px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr)}}
+
+.p-card{background:var(--card);border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);cursor:pointer;transition:transform 0.15s}
+.p-card:active{transform:scale(0.97)}
+.p-emoji{height:100px;display:flex;align-items:center;justify-content:center;font-size:48px;background:linear-gradient(135deg,#f5f7ff,#eef0ff)}
+.p-info{padding:10px}
+.p-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-cat{font-size:11px;color:var(--muted);margin-bottom:6px}
+.p-bottom{display:flex;align-items:center;justify-content:space-between}
+.p-price{font-size:14px;font-weight:700;color:var(--primary)}
+.add-btn{width:28px;height:28px;border-radius:50%;background:var(--primary);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:1px solid var(--border);z-index:100;box-shadow:0 -4px 20px rgba(0,0,0,0.08)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 10px;cursor:pointer;border:none;background:none;color:var(--muted);font-size:10px;gap:3px;font-family:inherit}
+.nav-item.active{color:var(--primary)}
+.nav-icon{font-size:22px}
+.nav-badge{position:relative}
+.badge-dot{position:absolute;top:-4px;right:-8px;background:var(--accent);color:#fff;font-size:10px;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;padding:0 4px}
+
+/* CART */
+.page{display:none;padding:16px;max-width:600px;margin:0 auto;padding-bottom:80px}
+.page.active{display:block}
+.page-title{font-size:18px;font-weight:700;margin-bottom:16px}
+.cart-item{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.cart-emoji{font-size:32px;width:48px;height:48px;background:#f5f7ff;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.cart-info{flex:1}
+.cart-name{font-size:14px;font-weight:600}
+.cart-price{font-size:13px;color:var(--primary);font-weight:700}
+.qty-ctrl{display:flex;align-items:center;gap:8px}
+.qty-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--primary)}
+.qty-num{font-size:14px;font-weight:700;min-width:20px;text-align:center}
+.cart-total{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.total-row{display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px}
+.total-row.big{font-size:16px;font-weight:700;color:var(--primary);margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.order-btn{width:100%;padding:15px;background:var(--primary);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px}
+.order-btn:active{background:var(--primary-dark)}
+.empty-state{text-align:center;padding:48px 16px;color:var(--muted)}
+.empty-state .empty-icon{font-size:56px;margin-bottom:12px}
+.empty-state p{font-size:15px}
+
+/* ORDER FORM */
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.form-group input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;color:var(--text)}
+.form-group input:focus{border-color:var(--primary)}
+
+/* ORDERS PAGE */
+.order-card{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.order-id{font-size:13px;font-weight:700}
+.status-badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.status-new{background:#FFF3E0;color:#E65100}
+.status-done{background:#E8F5E9;color:#2E7D32}
+.order-items{font-size:13px;color:var(--muted);margin-bottom:6px}
+.order-total{font-size:14px;font-weight:700;color:var(--primary)}
+.order-phone{font-size:12px;color:var(--muted)}
+
+/* ADMIN */
+.admin-login{max-width:340px;margin:40px auto;background:#fff;border-radius:20px;padding:32px;box-shadow:0 4px 20px rgba(0,0,0,0.1);text-align:center}
+.admin-login h2{font-size:20px;font-weight:700;margin-bottom:8px}
+.admin-login p{color:var(--muted);font-size:13px;margin-bottom:24px}
+.admin-panel{padding-bottom:80px}
+.section-title{font-size:16px;font-weight:700;margin:16px 16px 10px;color:var(--text)}
+.admin-order{background:#fff;border-radius:12px;padding:14px;margin:0 16px 10px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.done-btn{padding:6px 14px;background:var(--success);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;margin-top:8px}
+.del-btn{padding:6px 14px;background:var(--danger);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;margin-top:8px;margin-left:8px}
+.add-form{background:#fff;margin:0 16px 16px;border-radius:16px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.emoji-row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.emoji-btn{font-size:24px;width:40px;height:40px;border-radius:10px;border:2px solid transparent;background:#f5f7ff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.emoji-btn.sel{border-color:var(--primary);background:#eef0ff}
+.inp{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;margin-bottom:10px;color:var(--text)}
+.inp:focus{border-color:var(--primary)}
+.submit-btn{width:100%;padding:13px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer}
+.admin-p-item{background:#fff;margin:0 16px 8px;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.admin-p-emoji{font-size:28px;width:44px;height:44px;background:#f5f7ff;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.admin-p-info{flex:1}
+.admin-p-name{font-size:14px;font-weight:600}
+.admin-p-sub{font-size:12px;color:var(--muted)}
+.admin-del{background:none;border:none;font-size:20px;cursor:pointer;color:var(--danger);padding:4px}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px;margin-bottom:4px}
+.stat-box{background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.stat-val{font-size:22px;font-weight:700;color:var(--primary)}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.settings-box{background:#fff;margin:0 16px;border-radius:16px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.settings-box label{font-size:13px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px}
+.logout-btn{width:100%;padding:12px;background:#fff;color:var(--danger);border:1.5px solid var(--danger);border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1A1A2E;color:#fff;padding:10px 24px;border-radius:30px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity 0.3s;white-space:nowrap}
+.toast.show{opacity:1}
+select.inp option{color:var(--text)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <span class="store-name" id="store-name-header">🛒 DokonIM</span>
+    <button class="header-btn" onclick="goAdmin()" title="Admin">⚙️</button>
+  </div>
+</div>
+
+<!-- SHOP PAGE -->
+<div id="page-shop" class="active" style="display:block">
+  <div class="search-bar" style="margin:12px auto;max-width:568px;display:flex;padding:0 12px;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+    <span style="color:#8892A4;font-size:18px;margin-right:8px">🔍</span>
+    <input type="text" placeholder="Mahsulot qidiring..." id="search-inp" oninput="renderShop()" style="border:none;outline:none;flex:1;height:44px;font-size:14px;background:transparent"/>
+  </div>
+  <div class="cats" id="cat-list"></div>
+  <div class="grid" id="shop-grid"></div>
+  <div id="shop-empty" class="empty-state" style="display:none"><div class="empty-icon">📦</div><p>Mahsulotlar yo'q</p></div>
+</div>
+
+<!-- CART PAGE -->
+<div id="page-cart" style="display:none" class="page">
+  <div class="page-title">🛒 Savatcha</div>
+  <div id="cart-list"></div>
+  <div id="cart-empty" class="empty-state" style="display:none"><div class="empty-icon">🛒</div><p>Savatcha bo'sh</p></div>
+  <div id="cart-checkout" style="display:none">
+    <div class="cart-total">
+      <div class="total-row"><span>Mahsulotlar</span><span id="cart-count-txt"></span></div>
+      <div class="total-row big"><span>Jami:</span><span id="cart-total-txt"></span></div>
+    </div>
+    <div class="form-group"><label>Ismingiz</label><input id="c-name" type="text" placeholder="Ism Familiya"/></div>
+    <div class="form-group"><label>Telefon raqam</label><input id="c-phone" type="tel" placeholder="+998 90 123 45 67"/></div>
+    <div class="form-group"><label>Manzil (ixtiyoriy)</label><input id="c-addr" type="text" placeholder="Uy yoki do'kon manzili"/></div>
+    <button class="order-btn" onclick="placeOrder()">✅ Buyurtma berish</button>
+  </div>
+</div>
+
+<!-- MY ORDERS PAGE -->
+<div id="page-orders" style="display:none" class="page">
+  <div class="page-title">📋 Mening buyurtmalarim</div>
+  <div id="my-orders-list"></div>
+  <div id="my-orders-empty" class="empty-state" style="display:none"><div class="empty-icon">📋</div><p>Hali buyurtma yo'q</p></div>
+</div>
+
+<!-- ADMIN PAGE -->
+<div id="page-admin" style="display:none">
+  <div id="admin-login-wrap">
+    <div class="admin-login">
+      <div style="font-size:48px;margin-bottom:12px">🔐</div>
+      <h2>Admin Panel</h2>
+      <p>Do'kon egasi uchun</p>
+      <input class="inp" id="admin-pass" type="password" placeholder="Parol kiriting" onkeyup="if(event.key==='Enter')checkPass()"/>
+      <button class="submit-btn" onclick="checkPass()">Kirish</button>
+      <p style="font-size:11px;color:var(--muted);margin-top:12px">Boshlang'ich parol: <b>admin123</b></p>
+    </div>
+  </div>
+  <div id="admin-panel-wrap" class="admin-panel" style="display:none">
+    <div style="background:var(--primary);color:#fff;padding:16px 16px 12px;margin-bottom:16px">
+      <div style="font-size:18px;font-weight:700">⚙️ Admin Panel</div>
+      <div style="font-size:13px;opacity:0.8" id="admin-store-label"></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-val" id="st-prod">0</div><div class="stat-lbl">Mahsulot</div></div>
+      <div class="stat-box"><div class="stat-val" id="st-new" style="color:#E65100">0</div><div class="stat-lbl">Yangi</div></div>
+      <div class="stat-box"><div class="stat-val" id="st-done" style="color:var(--success)">0</div><div class="stat-lbl">Bajarildi</div></div>
+    </div>
+
+    <!-- NEW ORDERS -->
+    <div class="section-title">🔔 Yangi buyurtmalar</div>
+    <div id="admin-new-orders"></div>
+
+    <!-- ADD PRODUCT -->
+    <div class="section-title">➕ Mahsulot qo'shish</div>
+    <div class="add-form">
+      <input class="inp" id="ap-name" placeholder="Mahsulot nomi"/>
+      <input class="inp" id="ap-price" type="number" placeholder="Narxi (so'm)"/>
+      <select class="inp" id="ap-cat">
+        <option value="">Kategoriya tanlang</option>
+        <option>Mevalar</option><option>Sabzavotlar</option><option>Sut mahsulotlari</option>
+        <option>Non va shirinliklar</option><option>Ichimliklar</option><option>Go'sht</option>
+        <option>Baliq va dengiz mahsulotlari</option><option>Donlar va yorma</option><option>Boshqa</option>
+      </select>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:6px">Belgi tanlang:</div>
+      <div class="emoji-row" id="emoji-row"></div>
+      <button class="submit-btn" onclick="addProduct()">➕ Qo'shish</button>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="section-title">📦 Mahsulotlar ro'yxati</div>
+    <div id="admin-products"></div>
+
+    <!-- SETTINGS -->
+    <div class="section-title">⚙️ Sozlamalar</div>
+    <div class="settings-box">
+      <label>Do'kon nomi</label>
+      <input class="inp" id="store-name-inp" placeholder="Do'koningiz nomi"/>
+      <button class="submit-btn" onclick="saveName()">Saqlash</button>
+      <br><br>
+      <label>Parolni o'zgartirish</label>
+      <input class="inp" id="new-pass" type="password" placeholder="Yangi parol"/>
+      <button class="submit-btn" onclick="savePass()">Parolni saqlash</button>
+      <button class="logout-btn" onclick="logout()">🚪 Chiqish</button>
+    </div>
+    <div style="height:20px"></div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-item active" id="nav-shop" onclick="showPage('shop')">
+    <span class="nav-icon">🏪</span><span>Do'kon</span>
+  </button>
+  <button class="nav-item" id="nav-cart" onclick="showPage('cart')">
+    <span class="nav-icon nav-badge">🛒<span class="badge-dot" id="cart-badge" style="display:none">0</span></span><span>Savat</span>
+  </button>
+  <button class="nav-item" id="nav-orders" onclick="showPage('orders')">
+    <span class="nav-icon">📋</span><span>Buyurtmalar</span>
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const EMOJIS = ['🍎','🍊','🍋','🍇','🍓','🍒','🥭','🍑','🍉','🍈','🫐','🥝','🍌','🍍','🥕','🥦','🧅','🥔','🍅','🌽','🥒','🧄','🫑','🥑','🍆','🥛','🧈','🧀','🥚','🍳','🍞','🥐','🧁','🍰','🍫','🍬','🍭','🧃','💧','🥤','☕','🍵','🧋','🥩','🍗','🍖','🐟','🍣','🍚','🌾','🫘','🛒'];
+
+let data = JSON.parse(localStorage.getItem('dokon_data') || JSON.stringify({
+  storeName:'Mening Do\'konim', pass:'admin123',
+  products:[], orders:[], cart:[], myOrders:[]
+}));
+
+let selEmoji = '🛒', activeCat = 'Hammasi', adminLogged = false;
+
+function save(){localStorage.setItem('dokon_data',JSON.stringify(data))}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+function showPage(p){
+  ['shop','cart','orders'].forEach(x=>{
+    document.getElementById('page-'+x).style.display=x===p?'block':'none';
+    document.getElementById('nav-'+x).classList.toggle('active',x===p);
+  });
+  document.getElementById('page-admin').style.display='none';
+  if(p==='shop')renderShop();
+  if(p==='cart')renderCart();
+  if(p==='orders')renderMyOrders();
+}
+
+function goAdmin(){
+  ['shop','cart','orders'].forEach(x=>{
+    document.getElementById('page-'+x).style.display='none';
+    document.getElementById('nav-'+x).classList.remove('active');
+  });
+  document.getElementById('page-admin').style.display='block';
+  if(adminLogged)renderAdminPanel();
+}
+
+function checkPass(){
+  const v=document.getElementById('admin-pass').value;
+  if(v===data.pass){
+    adminLogged=true;
+    document.getElementById('admin-login-wrap').style.display='none';
+    document.getElementById('admin-panel-wrap').style.display='block';
+    renderAdminPanel();
+  } else showToast('❌ Parol noto\'g\'ri');
+}
+
+function logout(){
+  adminLogged=false;
+  document.getElementById('admin-login-wrap').style.display='block';
+  document.getElementById('admin-panel-wrap').style.display='none';
+  document.getElementById('admin-pass').value='';
+  showPage('shop');
+}
+
+// CATEGORIES
+function getCategories(){
+  const cats=['Hammasi',...new Set(data.products.map(p=>p.cat).filter(Boolean))];
+  return cats;
+}
+
+function renderCats(){
+  const list=document.getElementById('cat-list');
+  list.innerHTML=getCategories().map(c=>`<button class="cat-btn ${c===activeCat?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+}
+
+function setCat(c){activeCat=c;renderCats();renderShop();}
+
+// SHOP
+function renderShop(){
+  renderCats();
+  const q=document.getElementById('search-inp').value.toLowerCase();
+  let prods=data.products.filter(p=>{
+    const matchCat=activeCat==='Hammasi'||p.cat===activeCat;
+    const matchQ=!q||p.name.toLowerCase().includes(q)||(p.cat||'').toLowerCase().includes(q);
+    return matchCat&&matchQ;
+  });
+  const grid=document.getElementById('shop-grid');
+  const empty=document.getElementById('shop-empty');
+  document.getElementById('store-name-header').textContent='🛒 '+data.storeName;
+  if(!prods.length){grid.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  grid.innerHTML=prods.map(p=>`
+    <div class="p-card" onclick="addToCart(${p.id})">
+      <div class="p-emoji">${p.emoji||'🛒'}</div>
+      <div class="p-info">
+        <div class="p-name">${p.name}</div>
+        <div class="p-cat">${p.cat||''}</div>
+        <div class="p-bottom">
+          <span class="p-price">${Number(p.price).toLocaleString()} so'm</span>
+          <button class="add-btn" onclick="event.stopPropagation();addToCart(${p.id})">+</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// CART
+function addToCart(id){
+  const p=data.products.find(x=>x.id===id);
+  if(!p)return;
+  const ex=data.cart.find(x=>x.id===id);
+  if(ex)ex.qty++;
+  else data.cart.push({...p,qty:1});
+  save();updateCartBadge();
+  showToast('✅ Savatga qo\'shildi');
+}
+
+function updateCartBadge(){
+  const total=data.cart.reduce((s,x)=>s+x.qty,0);
+  const b=document.getElementById('cart-badge');
+  b.textContent=total;b.style.display=total?'flex':'none';
+}
+
+function changeQty(id,d){
+  const i=data.cart.findIndex(x=>x.id===id);
+  if(i<0)return;
+  data.cart[i].qty+=d;
+  if(data.cart[i].qty<=0)data.cart.splice(i,1);
+  save();updateCartBadge();renderCart();
+}
+
+function renderCart(){
+  const list=document.getElementById('cart-list');
+  const empty=document.getElementById('cart-empty');
+  const checkout=document.getElementById('cart-checkout');
+  if(!data.cart.length){list.innerHTML='';empty.style.display='block';checkout.style.display='none';return;}
+  empty.style.display='none';checkout.style.display='block';
+  list.innerHTML=data.cart.map(p=>`
+    <div class="cart-item">
+      <div class="cart-emoji">${p.emoji||'🛒'}</div>
+      <div class="cart-info">
+        <div class="cart-name">${p.name}</div>
+        <div class="cart-price">${Number(p.price).toLocaleString()} so'm</div>
+      </div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(${p.id},-1)">−</button>
+        <span class="qty-num">${p.qty}</span>
+        <button class="qty-btn" onclick="changeQty(${p.id},1)">+</button>
+      </div>
+    </div>`).join('');
+  const total=data.cart.reduce((s,x)=>s+x.price*x.qty,0);
+  const count=data.cart.reduce((s,x)=>s+x.qty,0);
+  document.getElementById('cart-count-txt').textContent=count+' ta';
+  document.getElementById('cart-total-txt').textContent=total.toLocaleString()+' so\'m';
+}
+
+function placeOrder(){
+  const name=document.getElementById('c-name').value.trim();
+  const phone=document.getElementById('c-phone').value.trim();
+  if(!name||!phone){showToast('❗ Ism va telefon kiriting');return;}
+  const order={
+    id:Date.now(),
+    name,phone,
+    addr:document.getElementById('c-addr').value.trim(),
+    items:[...data.cart],
+    total:data.cart.reduce((s,x)=>s+x.price*x.qty,0),
+    status:'new',
+    time:new Date().toLocaleString('uz-UZ',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})
+  };
+  data.orders.push(order);
+  data.myOrders.push(order);
+  data.cart=[];
+  save();updateCartBadge();
+  showToast('🎉 Buyurtma qabul qilindi!');
+  showPage('orders');
+}
+
+// MY ORDERS
+function renderMyOrders(){
+  const list=document.getElementById('my-orders-list');
+  const empty=document.getElementById('my-orders-empty');
+  if(!data.myOrders.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  list.innerHTML=[...data.myOrders].reverse().map(o=>`
+    <div class="order-card">
+      <div class="order-header">
+        <span class="order-id">#${String(o.id).slice(-4)}</span>
+        <span class="status-badge ${o.status==='done'?'status-done':'status-new'}">${o.status==='done'?'✅ Bajarildi':'🕐 Kutilmoqda'}</span>
+      </div>
+      <div class="order-items">${o.items.map(i=>i.emoji+' '+i.name+' x'+i.qty).join(', ')}</div>
+      <div class="order-total">${o.total.toLocaleString()} so'm</div>
+      <div class="order-phone" style="margin-top:4px;font-size:11px;color:var(--muted)">${o.time}</div>
+    </div>`).join('');
+}
+
+// ADMIN
+function buildEmojiPicker(){
+  document.getElementById('emoji-row').innerHTML=EMOJIS.map(e=>`<button class="emoji-btn ${e===selEmoji?'sel':''}" onclick="pickEmoji(this,'${e}')">${e}</button>`).join('');
+}
+
+function pickEmoji(el,e){
+  document.querySelectorAll('.emoji-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');selEmoji=e;
+}
+
+function addProduct(){
+  const name=document.getElementById('ap-name').value.trim();
+  const price=parseInt(document.getElementById('ap-price').value);
+  const cat=document.getElementById('ap-cat').value;
+  if(!name||!price||!cat){showToast('❗ Barcha maydonlarni to\'ldiring');return;}
+  data.products.push({id:Date.now(),name,price,cat,emoji:selEmoji});
+  save();
+  document.getElementById('ap-name').value='';
+  document.getElementById('ap-price').value='';
+  showToast('✅ Mahsulot qo\'shildi');
+  renderAdminPanel();
+}
+
+function deleteProduct(id){
+  if(!confirm('O\'chirishni tasdiqlaysizmi?'))return;
+  data.products=data.products.filter(p=>p.id!==id);
+  save();renderAdminPanel();showToast('🗑 O\'chirildi');
+}
+
+function markDone(id){
+  const o=data.orders.find(x=>x.id===id);
+  if(o){o.status='done';
+    const mo=data.myOrders.find(x=>x.id===id);
+    if(mo)mo.status='done';
+    save();renderAdminPanel();showToast('✅ Bajarildi deb belgilandi');
+  }
+}
+
+function saveName(){
+  const n=document.getElementById('store-name-inp').value.trim();
+  if(!n){showToast('❗ Nom kiriting');return;}
+  data.storeName=n;save();
+  document.getElementById('store-name-header').textContent='🛒 '+n;
+  showToast('✅ Saqlandi');
+}
+
+function savePass(){
+  const p=document.getElementById('new-pass').value.trim();
+  if(p.length<4){showToast('❗ Kamida 4 ta belgi');return;}
+  data.pass=p;save();
+  document.getElementById('new-pass').value='';
+  showToast('✅ Parol saqlandi');
+}
+
+function renderAdminPanel(){
+  document.getElementById('admin-store-label').textContent=data.storeName;
+  document.getElementById('store-name-inp').value=data.storeName;
+  buildEmojiPicker();
+
+  const newOrds=data.orders.filter(o=>o.status==='new');
+  const doneOrds=data.orders.filter(o=>o.status==='done');
+  document.getElementById('st-prod').textContent=data.products.length;
+  document.getElementById('st-new').textContent=newOrds.length;
+  document.getElementById('st-done').textContent=doneOrds.length;
+
+  const no=document.getElementById('admin-new-orders');
+  no.innerHTML=!newOrds.length
+    ?'<div style="padding:0 16px 10px;color:var(--muted);font-size:13px">Yangi buyurtma yo\'q</div>'
+    :[...newOrds].reverse().map(o=>`
+      <div class="admin-order">
+        <div style="display:flex;justify-content:space-between">
+          <span style="font-weight:700">#${String(o.id).slice(-4)} — ${o.name}</span>
+          <span class="status-badge status-new">Yangi</span>
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin:6px 0">${o.items.map(i=>i.emoji+' '+i.name+' x'+i.qty).join(', ')}</div>
+        <div style="font-weight:700;color:var(--primary)">${o.total.toLocaleString()} so'm</div>
+        <div style="font-size:12px;color:var(--muted)">${o.phone} ${o.addr?'· '+o.addr:''} · ${o.time}</div>
+        <button class="done-btn" onclick="markDone(${o.id})">✅ Bajarildi</button>
+      </div>`).join('');
+
+  const ap=document.getElementById('admin-products');
+  ap.innerHTML=!data.products.length
+    ?'<div style="padding:0 16px 10px;color:var(--muted);font-size:13px">Hali mahsulot yo\'q</div>'
+    :data.products.map(p=>`
+      <div class="admin-p-item">
+        <div class="admin-p-emoji">${p.emoji||'🛒'}</div>
+        <div class="admin-p-info">
+          <div class="admin-p-name">${p.name}</div>
+          <div class="admin-p-sub">${p.cat} · ${Number(p.price).toLocaleString()} so'm</div>
+        </div>
+        <button class="admin-del" onclick="deleteProduct(${p.id})">🗑</button>
+      </div>`).join('');
+}
+
+// INIT
+updateCartBadge();
+renderShop();
+</script>
+</body>
+</html>
